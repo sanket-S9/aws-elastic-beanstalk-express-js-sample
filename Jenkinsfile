@@ -1,15 +1,17 @@
 pipeline {
     agent any
 
+    options {
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+
     environment {
-        // docker hub image name - username/repo
         IMAGE_NAME = 'sanketadhikari/express-sample-app'
-        // jenkins credential id, set up separately in jenkins ui (never hardcode real creds here)
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
@@ -51,6 +53,7 @@ pipeline {
     post {
         always {
             sh 'docker logout || true'
+            archiveArtifacts artifacts: 'package.json, package-lock.json, Dockerfile', allowEmptyArchive: true
         }
     }
 }
